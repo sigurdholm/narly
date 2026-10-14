@@ -223,3 +223,5 @@
 "Expanded" = "Udvidet";
 "Collapsed" = "Sammenfoldet";
 "Options for %@" = "Indstillinger for %@";
+"Open other links in browser without asking" = "Åbn andre links i browseren uden at spørge";
+"Links that only a browser can open go straight to your preselected or first browser. Hold Option to choose." = "Links, som kun en browser kan åbne, går direkte til din forhåndsvalgte eller første browser. Hold Option nede for at vælge.";

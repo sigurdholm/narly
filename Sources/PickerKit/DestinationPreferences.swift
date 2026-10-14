@@ -24,6 +24,15 @@ public final class DestinationPreferences {
     public private(set) var appShortcuts: [String: String]
     public private(set) var appLinkBehaviors: [String: String]
 
+    public private(set) var opensUnrecognizedLinksInBrowser: Bool
+
+    public func setOpensUnrecognizedLinksInBrowser(_ enabled: Bool) {
+        guard enabled != opensUnrecognizedLinksInBrowser else { return }
+        opensUnrecognizedLinksInBrowser = enabled
+        defaults.set(enabled, forKey: Self.unrecognizedLinksKey)
+        onChange?()
+    }
+
     public func setAppLinkBehavior(_ behavior: AppLinkBehavior, for app: AppLink) {
         appLinkBehaviors[app.rawValue] = behavior.rawValue
         defaults.set(appLinkBehaviors, forKey: "narly.appLinkBehaviors.v1")
@@ -43,6 +52,7 @@ public final class DestinationPreferences {
     private static let menuBarKey = "narly.showsMenuBarIcon.v1"
     private static let manualKey = "narly.manualApplications.v1"
     private static let shortcutsKey = "narly.appShortcuts.v1"
+    private static let unrecognizedLinksKey = "narly.opensUnrecognizedLinksInBrowser.v1"
 
     public init(destinations: [Destination], defaults: UserDefaults = .standard,
                 catalogProvider: @escaping () -> [Destination] = { DestinationCatalog.supportedDestinations() }) {
@@ -56,6 +66,7 @@ public final class DestinationPreferences {
         customPickerSize = defaults.data(forKey: Self.sizeKey)
             .flatMap { try? JSONDecoder().decode(PickerSize.self, from: $0) } ?? .standard
         showsMenuBarIcon = defaults.object(forKey: Self.menuBarKey) as? Bool ?? true
+        opensUnrecognizedLinksInBrowser = defaults.object(forKey: Self.unrecognizedLinksKey) as? Bool ?? true
         appShortcuts = AppShortcut.validated(defaults.dictionary(forKey: Self.shortcutsKey) as? [String: String]
                                             ?? AppShortcut.defaults)
         saved = defaults.data(forKey: Self.key).flatMap { try? JSONDecoder().decode(Saved.self, from: $0) } ?? Saved()

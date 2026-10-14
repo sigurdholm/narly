@@ -78,6 +78,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         // Explicitly targeted apps and non-HTTP schemes remain handled by macOS.
         session.appLinkBehaviors = preferences.appLinkBehaviors
         session.routingDestinations = preferences.destinations
+        session.opensUnrecognizedLinksInBrowser = preferences.opensUnrecognizedLinksInBrowser
         session.receive(urls, optionHeld: optionHeld)
     }
 

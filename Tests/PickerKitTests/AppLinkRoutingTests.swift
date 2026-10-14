@@ -109,6 +109,46 @@ import Testing
         #expect(session.current == nil)
     }
 
+    @Test func unrecognizedLinksOpenInTopBrowser() async {
+        let opener = RoutingOpener()
+        let second = Destination(id: "second", name: "Second", applicationURL: destination.applicationURL)
+        let session = PickerSession(destinations: [destination, second, app], opener: opener)
+        session.opensUnrecognizedLinksInBrowser = true
+        session.ready()
+        let ordinary = URL(string: "https://example.com")!
+        session.receive([ordinary])
+        await settle(session)
+        #expect(opener.calls.map(\.1) == ["browser"])
+        #expect(opener.calls.map(\.0) == [ordinary])
+        #expect(session.current == nil)
+        #expect(!session.isPresented)
+    }
+
+    @Test func recognizedLinksAndOptionStillAsk() {
+        let session = PickerSession(destinations: [destination, app], opener: RoutingOpener())
+        session.opensUnrecognizedLinksInBrowser = true
+        session.ready()
+        session.receive([url])
+        #expect(session.isPresented)
+        let other = PickerSession(destinations: [destination, app], opener: RoutingOpener())
+        other.opensUnrecognizedLinksInBrowser = true
+        other.ready()
+        other.receive([URL(string: "https://example.com")!], optionHeld: true)
+        #expect(other.isPresented)
+        #expect(!other.isOpening)
+    }
+
+    @Test func appLinkWithoutInstalledAppOpensInBrowser() async {
+        let opener = RoutingOpener()
+        let session = PickerSession(destinations: [destination], opener: opener)
+        session.opensUnrecognizedLinksInBrowser = true
+        session.ready()
+        session.receive([url])
+        await settle(session)
+        #expect(opener.calls.map(\.1) == ["browser"])
+        #expect(session.current == nil)
+    }
+
     @Test func preferencesSurviveRestart() throws {
         let suite = "routing.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: suite))
@@ -118,5 +158,8 @@ import Testing
         preferences.setAppLinkBehavior(.app, for: .linear)
         let restored = DestinationPreferences(destinations: [destination, app], defaults: defaults)
         #expect(restored.appLinkBehaviors["linear"] == "app")
+        #expect(restored.opensUnrecognizedLinksInBrowser)
+        restored.setOpensUnrecognizedLinksInBrowser(false)
+        #expect(!DestinationPreferences(destinations: [destination, app], defaults: defaults).opensUnrecognizedLinksInBrowser)
     }
 }

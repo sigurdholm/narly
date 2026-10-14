@@ -92,10 +92,22 @@ struct SettingsGeneralView: View {
                 ForEach(preferences.availableBrowsers) { Text($0.name).tag($0.id) }
             }
             .accessibilityIdentifier("preferred-browser")
+
+            Toggle(L10n.text("Open other links in browser without asking"), isOn: Binding(
+                get: { preferences.opensUnrecognizedLinksInBrowser },
+                set: { preferences.setOpensUnrecognizedLinksInBrowser($0) }
+            ))
+            .toggleStyle(.switch)
+            .accessibilityIdentifier("open-unrecognized-links-in-browser")
         } header: {
             Text(L10n.text("Link picker"))
         } footer: {
-            Text(sizeDescription)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(sizeDescription)
+                if preferences.opensUnrecognizedLinksInBrowser {
+                    Text(L10n.text("Links that only a browser can open go straight to your preselected or first browser. Hold Option to choose."))
+                }
+            }
         }
         .pickerStyle(.menu)
     }

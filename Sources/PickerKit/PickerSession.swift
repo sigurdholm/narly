@@ -21,6 +21,8 @@ public final class PickerSession {
     }
     public var appLinkBehaviors: [String: String] = [:]
     public var routingDestinations: [Destination] = []
+    /// Skip the picker when no visible app other than a browser can open the link.
+    public var opensUnrecognizedLinksInBrowser = false
     private var automaticRoutes: [UUID: AppLinkBehavior] = [:]
 
     public var appShortcuts: [String: String]
@@ -129,9 +131,13 @@ public final class PickerSession {
         let wasEmpty = queue.pending.isEmpty
         let result = queue.enqueue(urls)
         for link in queue.pending where !previousIDs.contains(link.id) {
-            guard let app = AppLink.allCases.first(where: { $0.accepts(link.url) }) else { continue }
-            let behavior = AppLinkBehavior(rawValue: appLinkBehaviors[app.rawValue] ?? "") ?? .ask
-            let route = behavior.route(optionHeld: optionHeld)
+            let app = AppLink.allCases.first { $0.accepts(link.url) }
+            let behavior = app.flatMap { AppLinkBehavior(rawValue: appLinkBehaviors[$0.rawValue] ?? "") } ?? .ask
+            var route = behavior.route(optionHeld: optionHeld)
+            // Option still forces the picker, as it does for app link behaviors.
+            if route == .ask, !optionHeld, opensUnrecognizedLinksInBrowser, !hasAppDestination(for: link.url) {
+                route = .browser
+            }
             if route != .ask { automaticRoutes[link.id] = route }
         }
         if result.rejected.total > 0 {
@@ -143,6 +149,10 @@ public final class PickerSession {
         guard result.accepted > 0 || result.rejected.total > 0 else { return }
         if wasEmpty, result.accepted > 0 { resetSelection() }
         presentIfPossible()
+    }
+
+    private func hasAppDestination(for url: URL) -> Bool {
+        destinations.contains { $0.applicationURL != nil && $0.appLink?.accepts(url) == true }
     }
 
     public func refreshDestinations(_ destinations: [Destination], preferredBrowserID: String? = nil) {

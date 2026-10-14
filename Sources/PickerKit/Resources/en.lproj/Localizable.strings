@@ -223,3 +223,5 @@
 "Expanded" = "Expanded";
 "Collapsed" = "Collapsed";
 "Options for %@" = "Options for %@";
+"Open other links in browser without asking" = "Open other links in browser without asking";
+"Links that only a browser can open go straight to your preselected or first browser. Hold Option to choose." = "Links that only a browser can open go straight to your preselected or first browser. Hold Option to choose.";
