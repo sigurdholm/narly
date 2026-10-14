@@ -8,7 +8,7 @@ Your links. The right place. A native macOS app that lets you choose where each 
 
 ## Download
 
-Download the latest DMG from [Releases](https://github.com/andreasvillumsen/narly/releases).
+Download the latest DMG from [Releases](https://github.com/sigurdholm/narly/releases).
 Narly requires **macOS 26.0 or newer** and an **Apple Silicon** Mac.
 Preview builds are ad hoc signed and are not Apple-notarized.
 
